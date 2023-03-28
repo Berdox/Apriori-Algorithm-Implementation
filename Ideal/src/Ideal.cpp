@@ -57,5 +57,4 @@ std::map<std::string, int> Ideal::readDataBase(std::string dataBaseName, int& co
 std::map<std::string, int> Ideal::idealRun(std::string db, float minSup) {
     int transactionNum = 0;
     std::map<std::string, int> collection = readDataBase(db, transactionNum);
-    float minSupCount = minSup * float(transactionNum); 
 }

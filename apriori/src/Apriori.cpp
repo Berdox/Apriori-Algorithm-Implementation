@@ -56,12 +56,17 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
 
 std::map<std::string, int> Apriori::prune(std::map<std::string, int> collection, float minSup) {
     
+    for(auto tran : collection) {
+        if(float(tran.second) < minSup) {
+
+        }
+    }
 }
 
 std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
     int transactionNum = 0;
     std::map<std::string, int> collection = readDataBase(db, transactionNum);
-    float minSupCount = minSup * float(transactionNum); 
+    minSupCount = minSup * float(transactionNum); 
     prune(collection, minSupCount);
     
 }
