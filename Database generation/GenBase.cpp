@@ -42,22 +42,11 @@ int main () {
     // Generate the i0 - i99 and store in a vector
     std::vector<std::string> list = GenItems();
 
-    for(auto x : list) {
-        std::cout << x << std::endl;
-    }
-
-
     std::fstream output;
 
     // Generating the seed for the rand
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::srand(seed);
-
-    /*//Generate Small test database
-    output.open("testDatabase.txt", std::ios::app);
-    for(int i = 0; i < 10; i++) {
-        output << GenTransaction(std::rand() % 2 + 5, list) << "\n";
-    }*/
 
     //Generate 1000
     output.open("D1K.txt", std::ios::app);
