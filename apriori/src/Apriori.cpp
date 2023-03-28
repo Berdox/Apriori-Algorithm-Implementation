@@ -1,6 +1,7 @@
 #include "../include/Apriori.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& count) {
     std::map<std::string, int> collection;
@@ -29,8 +30,6 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
                 line.clear();
 
             } else {
-
-                std::cout << "sub string of line \n";
                 std::string sub = line.substr(0, pos);
 
                 if(collection.find(sub) != collection.end()) {
@@ -56,17 +55,40 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
 
 std::map<std::string, int> Apriori::prune(std::map<std::string, int> collection, float minSup) {
     
+    std::vector<std::string> keys;
+
     for(auto tran : collection) {
         if(float(tran.second) < minSup) {
-
+            keys.push_back(tran.first);
         }
     }
+
+    for(auto key : keys) {
+        collection.erase(key);
+    }
+
+    return collection;
+}
+
+std::map<std::string, int> Apriori::joinItemSets(std::map<std::string, int> collection) {
+    
 }
 
 std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
     int transactionNum = 0;
     std::map<std::string, int> collection = readDataBase(db, transactionNum);
+
     minSupCount = minSup * float(transactionNum); 
-    prune(collection, minSupCount);
-    
+
+    for(auto col : collection) {
+        std::cout << col.first << " and " << col.second << "\n";
+    }
+
+    collection = prune(collection, minSupCount);
+
+    for(auto col : collection) {
+        std::cout << "prune " <<  col.first << " and " << col.second << "\n";
+    }
+
+    return collection;
 }

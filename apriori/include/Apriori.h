@@ -9,6 +9,7 @@ class Apriori {
 
     std::map<std::string, int> readDataBase(std::string, int&);
     std::map<std::string, int> prune(std::map<std::string, int>, float);
+    std::map<std::string, int> joinItemSets(std::map<std::string, int>);
     std::map<std::string, int> aprioriRun(std::string, float minSup);
 
     private:

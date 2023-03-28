@@ -3,6 +3,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <chrono>
 
@@ -19,21 +20,26 @@ std::vector<std::string> GenItems () {
 //Generates the transactions filled with i0 - i99 with a range of 5 - 15 items
 std::string GenTransaction(int num, std::vector<std::string> itemList) {
 
+    std::map<int, int> indexs;
     std::string transactions = "";
-    
-    // Shuffles the vector to make random items to fill the transaction
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::shuffle(itemList.begin(), itemList.end(), std::default_random_engine(seed));
 
-    // Adds the items to the transaction
-    //transactions += "{";
+    //makes an random seletions of indexs
     for(int i = 0; i < num; i++) {
-        transactions += itemList[i];
-        if(i != num-1) {
-            transactions += ", ";
+        int ran = std::rand() % 100 + 0;
+        if(indexs.find(ran) != indexs.end()) {
+            i--;
+        } else {
+            indexs.insert(std::make_pair(ran, ran));
         }
     }
-    //transactions += "}";
+
+    for(auto i = indexs.begin(); i != indexs.end(); i++) {
+        transactions += itemList[i->first];
+        transactions += ", ";
+    }
+    
+    transactions.erase(transactions.size()-2, 2);
+    
     return transactions;
 }
 
@@ -75,10 +81,6 @@ int main () {
         output << GenTransaction(std::rand() % 11 + 5, list) << "\n";
     }
     output.close();
-
-    char c;
-
-    std::cin >> c;
 
     return 0;
 }
