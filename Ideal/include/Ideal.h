@@ -6,8 +6,6 @@
 #include <map>
 class Ideal {
     public:
-
-    std::map<std::string, int> readDataBase(std::string, int&);
     std::map<std::string, int> idealRun(std::string, float minSup);
 };
 
