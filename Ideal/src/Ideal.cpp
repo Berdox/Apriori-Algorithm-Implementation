@@ -12,14 +12,18 @@ std::map<std::string, int> Ideal::readDataBase(std::string dataBaseName, int& co
     }
 
     std::string line;
+
+    // read the database
     while (getline (file, line)) {
 
         while(line.size() != 0) {
 
+            //checks to if a ',' exist in the string line
             int pos = line.find(",");
 
             if(pos == -1) {
-
+                //',' doesn't exists so it must be at the end of the string
+                // adds to the map if the key exist already or inserts a new one
                 if(collection.find(line) != collection.end()) {
                     collection[line] += 1;
                 } else {
@@ -29,6 +33,8 @@ std::map<std::string, int> Ideal::readDataBase(std::string dataBaseName, int& co
                 line.clear();
 
             } else {
+                //',' exists
+                // adds to the map if the key exist already or inserts a new one
                 std::string sub = line.substr(0, pos);
 
                 if(collection.find(sub) != collection.end()) {
@@ -36,10 +42,11 @@ std::map<std::string, int> Ideal::readDataBase(std::string dataBaseName, int& co
                 } else {
                     collection.insert(std::make_pair(sub, 1));
                 }
-
+                // shrinks the string down by the substring "i1, i3" -> "i3"
                 line.erase(0, sub.length()+1);
             }
         }
+        //counts how many lines it reads
         count++;
     }
 

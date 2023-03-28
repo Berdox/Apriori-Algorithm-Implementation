@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& count) {
     std::map<std::string, int> collection;
@@ -13,14 +14,17 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
     }
 
     std::string line;
+
+    // read the database
     while (getline (file, line)) {
 
         while(line.size() != 0) {
-
+            //checks to if a ',' exist in the string line
             int pos = line.find(",");
 
             if(pos == -1) {
-
+                //',' doesn't exists so it must be at the end of the string
+                // adds to the map if the key exist already or inserts a new one
                 if(collection.find(line) != collection.end()) {
                     collection[line] += 1;
                 } else {
@@ -30,6 +34,8 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
                 line.clear();
 
             } else {
+                //',' exists
+                // adds to the map if the key exist already or inserts a new one
                 std::string sub = line.substr(0, pos);
 
                 if(collection.find(sub) != collection.end()) {
@@ -37,10 +43,11 @@ std::map<std::string, int> Apriori::readDataBase(std::string dataBaseName, int& 
                 } else {
                     collection.insert(std::make_pair(sub, 1));
                 }
-
+                // shrinks the string down by the substring "i1, i3" -> "i3"
                 line.erase(0, sub.length()+1);
             }
         }
+        //counts how many lines it reads
         count++;
     }
 
@@ -71,7 +78,18 @@ std::map<std::string, int> Apriori::prune(std::map<std::string, int> collection,
 }
 
 std::map<std::string, int> Apriori::joinItemSets(std::map<std::string, int> collection) {
-    
+    std::map<std::string, int> join;
+    std::cout << "joinning " << std::endl;
+    for(auto it = collection.begin(); it != collection.end(); it++) {
+        auto temp = it;
+        temp++;
+        for(auto itt = temp; itt != collection.end(); itt++) {
+            join.insert(std::make_pair((it->first + itt->first), std::min(it->second, itt->second)));
+        }
+        
+    }
+
+    return join;
 }
 
 std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
@@ -88,6 +106,18 @@ std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
 
     for(auto col : collection) {
         std::cout << "prune " <<  col.first << " and " << col.second << "\n";
+    }
+
+    collection = joinItemSets(collection);
+
+    for(auto col : collection) {
+        std::cout << "join " <<  col.first << " and " << col.second << "\n";
+    }
+
+    collection = prune(collection, minSupCount);
+
+    for(auto col : collection) {
+        std::cout << "prune 2 " <<  col.first << " and " << col.second << "\n";
     }
 
     return collection;
