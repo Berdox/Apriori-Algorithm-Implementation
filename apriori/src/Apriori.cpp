@@ -5,14 +5,14 @@
 #include <vector>
 #include <algorithm>
 
-std::map<std::string, int> Apriori::readDataBase(int& count) {
-    std::map<std::string, int> collection;
-    
+int Apriori::readDataBase(std::map<std::string, int> &table) {
+    int itemsetCount = 0;
+
     std::ifstream file;
     file.open(dataBaseName);
     if(!file.is_open()) {
-        std::cout << "not open" << std::endl;
-        return collection;
+        std::cerr << "unable to open file" << std::endl;
+        return -1;
     }
 
     // Read text file one line at a time. Assumes items are delimited by a
@@ -25,19 +25,15 @@ std::map<std::string, int> Apriori::readDataBase(int& count) {
         std::string item;
         while(iss>>item) {
             item = item.substr(0, item.length()-1);
-            collection[item]++;
+            table[item]++;
         }
 
-        count++;
-    }
-
-    for(auto i : collection) {
-        std::cout << "key " << i.first << " Value " << i.second << std::endl;
+        itemsetCount++;
     }
 
     file.close();
 
-    return collection;
+    return itemsetCount;
 }
 
 std::map<std::string, int> Apriori::scanDataBase(std::map<std::string, int> collection) {
@@ -129,13 +125,16 @@ std::map<std::string, int> Apriori::joinItemSets(std::map<std::string, int> coll
     return join;
 }
 
-std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
-    int transactionNum = 0;
-    dataBaseName = db;
-    std::map<std::string, int> collection = readDataBase(transactionNum);
+std::map<std::string, int> Apriori::aprioriRun() {
+    // Perform initial scan of file
+    std::map<std::string, int> collection;
+    int ret = readDataBase(collection);
+    if(ret == -1) {
+        std::cerr << "error running apriori algorithm" << std::endl;
+        return collection;
+    }
 
-
-    minSupCount = minSup * float(transactionNum); 
+    minSupCount = (int)(minSup * float(ret)); 
     //while(1) {
         /*for(auto col : collection) {
             std::cout << col.first << " and " << col.second << "\n";

@@ -2,6 +2,11 @@
 #include <string>
 #include "../include/Apriori.h"
 
+/*
+ * Usage:
+ * ./apriori <filename>
+ */
+
 int main(int argc, char* argv[]) {
     if(argc < 2) {
         std::cerr << "no filename provided" << std::endl;
@@ -10,7 +15,7 @@ int main(int argc, char* argv[]) {
 
     std::string filename = argv[1];
 
-    Apriori a;
-    a.aprioriRun(filename, 0.22);
+    Apriori a(filename, 0.22);
+    a.aprioriRun();
     return 0;
 }
