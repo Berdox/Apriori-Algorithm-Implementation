@@ -16,6 +16,15 @@ int main(int argc, char* argv[]) {
     std::string filename = argv[1];
 
     Apriori a(filename, 0.22);
-    a.aprioriRun();
+    auto transactions = a.aprioriRun();
+
+    std::cout << "TRANSACTIONS:" << std::endl;
+    for(itemset &s:transactions) {
+        std::cout << "{";
+        for(auto i:s)
+            std::cout<<i<<",";
+        std::cout<<"} - ["<<(int)s.size()<<"]\n";
+    }
+
     return 0;
 }
