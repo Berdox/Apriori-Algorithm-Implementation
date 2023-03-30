@@ -1,108 +1,61 @@
 #include "../include/Apriori.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 
-std::map<std::string, int> Apriori::readDataBase(int& count) {
-    std::map<std::string, int> collection;
-    std::fstream file;
+int Apriori::readDataBase(std::map<std::string, int> &table) {
+    int itemsetCount = 0;
+
+    std::ifstream file;
     file.open(dataBaseName);
-
     if(!file.is_open()) {
-        std::cout << "not open" << std::endl;
+        std::cerr << "unable to open file" << std::endl;
+        return -1;
     }
 
+    // Read text file one line at a time. Assumes items are delimited by a
+    // comma and a space.
     std::string line;
-
-    // read the database
     while (getline (file, line)) {
-
-        while(line.size() != 0) {
-            //checks to if a ',' exist in the string line
-            int pos = line.find(",");
-
-            if(pos == -1) {
-                //',' doesn't exists so it must be at the end of the string
-                // adds to the map if the key exist already or inserts a new one
-                if(collection.find(line) != collection.end()) {
-                    collection[line] += 1;
-                } else {
-                    collection.insert(std::make_pair(line, 1));
-                }
-
-                line.clear();
-
-            } else {
-                //',' exists
-                // adds to the map if the key exist already or inserts a new one
-                std::string sub = line.substr(0, pos);
-
-                if(collection.find(sub) != collection.end()) {
-                    collection[sub] += 1;
-                } else {
-                    collection.insert(std::make_pair(sub, 1));
-                }
-                // shrinks the string down by the substring "i1, i3" -> "i3"
-                line.erase(0, sub.length()+1);
-            }
+        line += ",";
+        
+        std::istringstream iss(line);
+        std::string item;
+        while(iss>>item) {
+            item = item.substr(0, item.length()-1);
+            table[item]++;
         }
-        //counts how many lines it reads
-        count++;
-    }
 
-    for(auto i : collection) {
-        std::cout << "key " << i.first << " Value " << i.second << std::endl;
+        itemsetCount++;
     }
 
     file.close();
 
-    return collection;
+    return itemsetCount;
 }
 
 std::map<std::string, int> Apriori::scanDataBase(std::map<std::string, int> collection) {
-    std::fstream file;
+    std::ifstream file;
     file.open(dataBaseName);
-
     if(!file.is_open()) {
         std::cout << "not open" << std::endl;
+        return collection;
     }
 
-    std::string line;
-
     // read the database
+    std::string line;
     while (getline (file, line)) {
-
         std::map<std::string, int> pairs;
 
-        while(line.size() != 0) {
-            //checks to if a ',' exist in the string line
-            int pos = line.find(",");
+        line += ",";
 
-            if(pos == -1) {
-                //',' doesn't exists so it must be at the end of the string
-                // adds to the map if the key exist already or inserts a new one
-                if(pairs.find(line) != pairs.end()) {
-                    pairs[line] += 1;
-                } else {
-                    pairs.insert(std::make_pair(line, 1));
-                }
-
-                line.clear();
-
-            } else {
-                //',' exists
-                // adds to the map if the key exist already or inserts a new one
-                std::string sub = line.substr(0, pos);
-
-                if(pairs.find(sub) != pairs.end()) {
-                    pairs[sub] += 1;
-                } else {
-                    pairs.insert(std::make_pair(sub, 1));
-                }
-                // shrinks the string down by the substring "i1, i3" -> "i3"
-                line.erase(0, sub.length()+1);
-            }
+        std::istringstream iss(line);
+        std::string item;
+        while(iss>>item) {
+            item = item.substr(0, item.length()-1);
+            pairs[item]++;
         }
 
         for(auto it = collection.begin(); it != collection.end(); it++) {
@@ -172,13 +125,16 @@ std::map<std::string, int> Apriori::joinItemSets(std::map<std::string, int> coll
     return join;
 }
 
-std::map<std::string, int> Apriori::aprioriRun(std::string db, float minSup) {
-    int transactionNum = 0;
-    dataBaseName = db;
-    std::map<std::string, int> collection = readDataBase(transactionNum);
+std::map<std::string, int> Apriori::aprioriRun() {
+    // Perform initial scan of file
+    std::map<std::string, int> collection;
+    int ret = readDataBase(collection);
+    if(ret == -1) {
+        std::cerr << "error running apriori algorithm" << std::endl;
+        return collection;
+    }
 
-
-    minSupCount = minSup * float(transactionNum); 
+    minSupCount = (int)(minSup * float(ret)); 
     //while(1) {
         /*for(auto col : collection) {
             std::cout << col.first << " and " << col.second << "\n";
