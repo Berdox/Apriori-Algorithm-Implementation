@@ -5,29 +5,34 @@
 #include <string>
 #include <map>
 #include <set>
+#include <vector>
+#include <ostream>
 
 typedef std::set<std::string> itemset;
 
 class Apriori {
   public:
-    Apriori(std::string dbName, float minSup)
-        : dataBaseName(dbName), minSup(minSup) {}
-
-    /* Reads initial itemsets from file.
-     * Supply table to fill by reference as 'table'
-     * Returns number of itemsets read
-     */
-    int readDataBase(std::map<std::string, int> &table);
+    Apriori(std::string dbName, double minSup);
+    ~Apriori() {}
     
-    std::map<std::string, int> scanDataBase(std::map<std::string, int>);
-    std::map<std::string, int> prune(std::map<std::string, int>, float);
-    std::map<std::string, int> joinItemSets(std::map<std::string, int>);
-    std::map<std::string, int> aprioriRun();
+    std::vector<itemset> aprioriRun();
 
   private:
-    std::string dataBaseName;
-    float minSup;
+    double minSup;
     int minSupCount;
+
+    std::vector<itemset> transactions;
+
+    /* Reads initial itemsets from file.
+     * Supply name of file to read from.
+     * Returns number of itemsets read and populates the 'transactions' vector
+     * for future reference.
+     */
+    int readDataBase(std::string dbName);
+    
+    // std::map<std::string, int> scanDataBase(std::map<std::string, int>);
+    // std::map<std::string, int> prune(std::map<std::string, int>, float);
+    // std::map<std::string, int> joinItemSets(std::map<std::string, int>);
 };
 
 #endif
