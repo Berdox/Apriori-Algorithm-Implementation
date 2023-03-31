@@ -1,4 +1,3 @@
-
 #ifndef APRIORI_H_INCLUDED
 #define APRIORI_H_INCLUDED
 
@@ -15,7 +14,11 @@ class Apriori {
     Apriori(std::string dbName, double minSup);
     ~Apriori() {}
     
-    std::vector<itemset> aprioriRun();
+    /* Implementation of the Apriori algorithm.
+     * Supply a vector of itemsets to populate with results of algorithm.
+     * Returns the number of DB scans performed.
+     */
+    int aprioriRun(std::vector<itemset> &frequent_itemsets);
 
   private:
     double minSup;
@@ -29,10 +32,16 @@ class Apriori {
      * for future reference.
      */
     int readDataBase(std::string dbName);
+  
+    /* Scans through the initial database to count the occurences of each
+     * itemset in 'candidateSet'.
+     * Supply both a frequency table to populate, and the candidate set to look
+     * for.
+     * Returns the size of the frequency table.
+     */
+    int scanDataBase(std::map<itemset,int> &freqTable,
+            std::set<itemset> &candidateSet);
     
-    // std::map<std::string, int> scanDataBase(std::map<std::string, int>);
-    // std::map<std::string, int> prune(std::map<std::string, int>, float);
-    // std::map<std::string, int> joinItemSets(std::map<std::string, int>);
 };
 
 #endif
