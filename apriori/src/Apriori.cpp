@@ -4,12 +4,29 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <ostream>
+#include <cmath>
 
-int Apriori::readDataBase(std::map<std::string, int> &table) {
-    int itemsetCount = 0;
+bool operator<(const itemset &a, const itemset &b) {
+    // Ensure itemsets are sorted in lexicographical order
+    return std::lexicographical_compare(begin(a), end(a), begin(b), end(b));
+}
 
+Apriori::Apriori(std::string dbName, double minSup) : minSup(minSup) {
+    // Perform initial scan of file
+    int ret = readDataBase(dbName);
+    if(ret == -1) {
+        std::cerr << "error initializing apriori" << std::endl;
+        return;
+    }
+
+    // Threshold for number of occurances to call frequent
+    minSupCount = (int)std::ceil(minSup * float(ret)); 
+}
+
+int Apriori::readDataBase(std::string dbName) {
     std::ifstream file;
-    file.open(dataBaseName);
+    file.open(dbName);
     if(!file.is_open()) {
         std::cerr << "unable to open file" << std::endl;
         return -1;
@@ -21,145 +38,96 @@ int Apriori::readDataBase(std::map<std::string, int> &table) {
     while (getline (file, line)) {
         line += ",";
         
+        itemset newItemset;
         std::istringstream iss(line);
         std::string item;
         while(iss>>item) {
             item = item.substr(0, item.length()-1);
-            table[item]++;
+            newItemset.insert(item);
         }
 
-        itemsetCount++;
+        transactions.push_back(newItemset);
     }
 
     file.close();
 
-    return itemsetCount;
+    return transactions.size();
 }
 
-std::map<std::string, int> Apriori::scanDataBase(std::map<std::string, int> collection) {
-    std::ifstream file;
-    file.open(dataBaseName);
-    if(!file.is_open()) {
-        std::cout << "not open" << std::endl;
-        return collection;
+int Apriori::scanDataBase(std::map<itemset,int> &freqTable,
+        std::set<itemset> &candidateSet) {
+    // Look only for occurences of items within the candidate set
+    for(auto &transaction : transactions) {
+        for(itemset i : candidateSet) {
+            // If intersection of candidate and transaction is == candidate,
+            // then it exists within the transaction
+            itemset intersection;
+            std::set_intersection(begin(i), end(i),
+                    begin(transaction), end(transaction),
+                    std::inserter(intersection, begin(intersection)));
+            if(intersection.size() == i.size())
+                freqTable[i]++;
+        }
     }
 
-    // read the database
-    std::string line;
-    while (getline (file, line)) {
-        std::map<std::string, int> pairs;
+    return (int)freqTable.size();
+}
 
-        line += ",";
-
-        std::istringstream iss(line);
-        std::string item;
-        while(iss>>item) {
-            item = item.substr(0, item.length()-1);
-            pairs[item]++;
+int Apriori::aprioriRun(std::vector<itemset> &frequent) {
+    // Assuming no duplicate items can exist in any given transaction, gather
+    // the inital frequencies from DB
+    int dbScans = 1;
+    std::set<itemset> candidateSet;
+    for(auto &transaction : transactions) {
+        for(auto &item : transaction) {
+            itemset newItemset = {item};
+            candidateSet.insert(newItemset);
         }
+    }
 
-        for(auto it = collection.begin(); it != collection.end(); it++) {
-            std::vector<std::string> colFreq;
-            std::string freq = it->first;
-            std::cout << "freq: " << freq << std::endl;
-            for(unsigned int i = 1; i < freq.size(); i++) {
-                if(freq[i] == '\n' || freq[i] == 'i') {
-                    //std::cout << "sub " << freq.substr(0, i) << '\n';
-                    colFreq.push_back(freq.substr(0, i));
-                    freq.erase(0, i);
-                    i = 1;
+    while(!candidateSet.empty()) {
+        int K = begin(candidateSet)->size();
+
+        // Scan DB for candidate itemsets
+        std::map<itemset,int> freqTable;
+        scanDataBase(freqTable, candidateSet);
+        dbScans++;
+
+        // See which itemsets > minSup
+        std::vector<itemset> frequent_k;
+        for(auto &[candidate, freq] : freqTable) {
+            if(freq >= minSupCount)
+                frequent_k.push_back(candidate);
+        }
+        for(itemset &i : frequent_k)
+            frequent.push_back(i);
+
+        // Generate new candidate set (Gross...)
+        candidateSet.clear();
+        if((int)frequent_k.size() == 0) break;
+        for(auto it1 = begin(frequent_k); it1 < end(frequent_k)-1; ++it1) {
+            auto it2 = it1 + 1;
+            while(it2 < end(frequent_k)) {
+                // For two candidate sets, see if K-1 items match
+                int k = 0;
+                auto itemsetA = it1->begin();
+                auto itemsetB = it2->begin();
+                while(k < K-1) {
+                    if(*itemsetA == *itemsetB) {
+                        k++;
+                        ++itemsetA;
+                        ++itemsetB;
+                    } else break;
                 }
-                std::cout << "freq2: " << freq << std::endl;
+                if(k == K-1) {
+                    itemset newItemset = *it1;
+                    newItemset.insert(*itemsetB);
+                    candidateSet.insert(newItemset);
+                    ++it2;
+                } else break;
             }
-            for(auto p : colFreq) {
-                std::cout << "col " << p << '\n';
-            }
-            std::cout << "break \n";
-            /*unsigned int count = 0;
-            for(unsigned int i = 0; i < colFreq.size(); i++) {
-                if(pairs.find(colFreq[i]) != pairs.end()) {
-                    count++;
-                }
-            }*/
-
-            /*if(count == colFreq.size()) {
-                it->second++;
-            }*/
         }
     }
 
-    file.close();
-
-    return collection;
-}
-
-std::map<std::string, int> Apriori::prune(std::map<std::string, int> collection, float minSup) {
-    
-    std::vector<std::string> keys;
-
-    for(auto tran : collection) {
-        if(float(tran.second) < minSup) {
-            keys.push_back(tran.first);
-        }
-    }
-
-    for(auto key : keys) {
-        collection.erase(key);
-    }
-
-    return collection;
-}
-
-std::map<std::string, int> Apriori::joinItemSets(std::map<std::string, int> collection) {
-    std::map<std::string, int> join;
-    std::cout << "joinning " << std::endl;
-    for(auto it = collection.begin(); it != collection.end(); it++) {
-        auto temp = it;
-        temp++;
-        for(auto itt = temp; itt != collection.end(); itt++) {
-            join.insert(std::make_pair((it->first + itt->first), 0));
-        }
-        
-    }
-
-    return join;
-}
-
-std::map<std::string, int> Apriori::aprioriRun() {
-    // Perform initial scan of file
-    std::map<std::string, int> collection;
-    int ret = readDataBase(collection);
-    if(ret == -1) {
-        std::cerr << "error running apriori algorithm" << std::endl;
-        return collection;
-    }
-
-    minSupCount = (int)(minSup * float(ret)); 
-    //while(1) {
-        /*for(auto col : collection) {
-            std::cout << col.first << " and " << col.second << "\n";
-        }*/
-        std::map<std::string, int> copy = collection;
-    // keep a collection of the last one and then prune and if there is nothing left your done
-        collection = prune(collection, minSupCount);
-
-        for(auto col : collection) {
-            std::cout << "prune " <<  col.first << " and " << col.second << "\n";
-        }
-
-        collection = joinItemSets(collection);
-
-        for(auto col : collection) {
-            std::cout << "join " <<  col.first << " and " << col.second << "\n";
-        }
-
-        collection = scanDataBase(collection);
-
-        for(auto col : collection) {
-            std::cout << "scan " <<  col.first << " and " << col.second << "\n";
-        }
-
-    //}
-
-    return collection;
+    return dbScans;
 }

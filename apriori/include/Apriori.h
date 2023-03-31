@@ -1,33 +1,47 @@
-
 #ifndef APRIORI_H_INCLUDED
 #define APRIORI_H_INCLUDED
 
 #include <string>
 #include <map>
 #include <set>
+#include <vector>
+#include <ostream>
 
 typedef std::set<std::string> itemset;
 
 class Apriori {
   public:
-    Apriori(std::string dbName, float minSup)
-        : dataBaseName(dbName), minSup(minSup) {}
-
-    /* Reads initial itemsets from file.
-     * Supply table to fill by reference as 'table'
-     * Returns number of itemsets read
-     */
-    int readDataBase(std::map<std::string, int> &table);
+    Apriori(std::string dbName, double minSup);
+    ~Apriori() {}
     
-    std::map<std::string, int> scanDataBase(std::map<std::string, int>);
-    std::map<std::string, int> prune(std::map<std::string, int>, float);
-    std::map<std::string, int> joinItemSets(std::map<std::string, int>);
-    std::map<std::string, int> aprioriRun();
+    /* Implementation of the Apriori algorithm.
+     * Supply a vector of itemsets to populate with results of algorithm.
+     * Returns the number of DB scans performed.
+     */
+    int aprioriRun(std::vector<itemset> &frequent_itemsets);
 
   private:
-    std::string dataBaseName;
-    float minSup;
+    double minSup;
     int minSupCount;
+
+    std::vector<itemset> transactions;
+
+    /* Reads initial itemsets from file.
+     * Supply name of file to read from.
+     * Returns number of itemsets read and populates the 'transactions' vector
+     * for future reference.
+     */
+    int readDataBase(std::string dbName);
+  
+    /* Scans through the initial database to count the occurences of each
+     * itemset in 'candidateSet'.
+     * Supply both a frequency table to populate, and the candidate set to look
+     * for.
+     * Returns the size of the frequency table.
+     */
+    int scanDataBase(std::map<itemset,int> &freqTable,
+            std::set<itemset> &candidateSet);
+    
 };
 
 #endif
