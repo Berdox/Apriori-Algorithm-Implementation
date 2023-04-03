@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "../include/Apriori.h"
+#include "../include/Timer.h"
 
 /*
  * Usage:
@@ -8,6 +9,8 @@
  */
 
 int main(int argc, char* argv[]) {
+
+    Timer t;
     // Get filename
     if(argc < 2) {
         std::cerr << "no filename provided" << std::endl;
@@ -37,5 +40,6 @@ int main(int argc, char* argv[]) {
     std::cout << (int)frequent_itemsets.size() << " itemsets found in "
         << dbScans << " scans"<<std::endl;
 
+    std::cout << "Time taken " << t.elapsed() << " seconds\n";
     return 0;
 }
