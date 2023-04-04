@@ -17,8 +17,13 @@ inline bool operator<(const item &a, const item &b) {
 }
 
 inline bool operator<(const itemset &a, const itemset &b) {
-    // Ensure itemsets are sorted in lexicographical order
-    return std::lexicographical_compare(begin(a), end(a), begin(b), end(b));
+    if(a.size() < b.size())
+        return true;
+    else if(a.size() == b.size())
+        // Ensure itemsets are sorted in lexicographical order
+        return std::lexicographical_compare(begin(a), end(a), begin(b), end(b));
+    else
+        return false;
 }
 
 #endif // ITEMSET_H_INCLUDED

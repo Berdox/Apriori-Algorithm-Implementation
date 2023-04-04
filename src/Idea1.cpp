@@ -1,91 +1,127 @@
 #include "../include/Idea1.h"
 #include "../include/Itemset.h"
+
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
 #include <algorithm>
-#include <ostream>
 #include <cmath>
 
-int Idea1::scanDataBase(std::map<itemset,int> &freqTable,
-        std::set<itemset> &candidateSet) {
+int Idea1::scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
+        std::set<std::pair<itemset, int>> &candidateSet,
+        std::set<itemset> &frequent) {
     // Look only for occurences of items within the candidate set
-    for(auto &transaction : transactions) {
-        for(itemset i : candidateSet) {
+    int idx = scanNo * (int)transactions.size();
+    while(idx < (scanNo+1) * (int)transactions.size()) {
+        auto &transaction = transactions[idx % (int)transactions.size()];
+        // std::cout<<"transaction: "<<idx<<" ("<<idx%transactions.size()<<")"<<std::endl;
+
+        if(candidateSet.empty()) break;
+        auto it = begin(candidateSet);
+        while(it!=end(candidateSet)) {
+            const itemset &itms = it->first;
+            const int &endIdx = it->second;
+            // std::cout << "looking for {";
+            // for(item x : itms)
+            //     std::cout<<x.name<<" ";
+            // std::cout<<"} with end: "<<endIdx<<std::endl;
+            
+
+            // This candidate has completed 1 full DB scan
+            if(idx >= endIdx) {
+                // std::cout << "done counting {";
+                // for(item x : it->first)
+                //     std::cout<<x.name<<" ";
+                // std::cout<<"} at idx: "<<idx<<std::endl;
+                it = candidateSet.erase(it);
+                continue;
+            }
+
             // If intersection of candidate and transaction is == candidate,
             // then it exists within the transaction
             itemset intersection;
-            std::set_intersection(begin(i), end(i),
+            std::set_intersection(begin(itms), end(itms),
                     begin(transaction), end(transaction),
                     std::inserter(intersection, begin(intersection)));
-            if(intersection.size() == i.size())
-                freqTable[i]++;
+            if(intersection.size() == itms.size()) {
+
+                // std::cout<<"found itemset {";
+                // for(item x : itms)
+                //     std::cout<<x.name<<" ";
+                // std::cout<<"}\n";
+                
+                freqTable[itms]++;
+                if(freqTable[itms] >= minSupCount && !frequent.count(itms)) {
+                    // std::cout<<"frequent!"<<std::endl;
+                    frequent.insert(itms);
+                    
+                    int K = itms.size();
+                    for(const itemset &other_frequent : frequent) {
+                        if((int)other_frequent.size() != K) continue;
+
+                        // For two candidate sets, see if K-1 items match
+                        int k = 0;
+                        auto itemsetA = itms.begin();
+                        auto itemsetB = other_frequent.begin();
+                 
+                        // std::cout<<"comparing with {";
+                        // for(item x : other_frequent)
+                        //     std::cout<<x.name<<" ";
+                        // std::cout<<"}"<<std::endl;
+                        
+                        while(k < K-1) {
+                            if((*itemsetA).name == (*itemsetB).name) {
+                                k++;
+                                ++itemsetA;
+                                ++itemsetB;
+                            } else break;
+                        }
+                        if(k == K-1) {
+                            itemset newItemset = itms;
+                            newItemset.insert(*(other_frequent.rbegin()));
+                            if(newItemset.size() == itms.size()) continue;
+
+                            // std::cout<<"creating new itemset {";
+                            // for(item x : newItemset)
+                            //     std::cout<<x.name<<" ";
+                            // std::cout<<"} at idx: "<<idx+transactions.size()<<std::endl;
+                            
+                            candidateSet.insert({
+                                    newItemset,
+                                    idx+(int)transactions.size()
+                                });
+                        }
+                    }
+                }
+            }
+            ++it;
         }
+
+        idx++;
     }
 
-    return (int)freqTable.size();
+    return idx;
 }
 
-int Idea1::aprioriRun(std::vector<itemset> &frequent) {
-    std::cout << "OOOH USING IDEA1... FANCY" << std::endl;
+double Idea1::aprioriRun(std::set<itemset> &frequent) {
     // Assuming no duplicate items can exist in any given transaction, gather
     // the inital frequencies from DB
-    int dbScans = 1;
-    std::set<itemset> candidateSet;
+    double dbScans = 1;
+    std::set<std::pair<itemset,int>> candidateSet;
     for(auto &transaction : transactions) {
         for(auto &item : transaction) {
             itemset newItemset = {item};
-            candidateSet.insert(newItemset);
+            candidateSet.insert({newItemset,transactions.size()});
         }
     }
 
+    std::map<itemset,int> freqTable;
+    int scanCount = 0;
     while(!candidateSet.empty()) {
-        int K = begin(candidateSet)->size();
-        std::cout << "Generating " << K << "-itemsets" << std::endl;
-
-        // Scan DB for candidate itemsets
-        std::map<itemset,int> freqTable;
-        scanDataBase(freqTable, candidateSet);
-        dbScans++;
-
-        // See which itemsets > minSup
-        std::vector<itemset> frequent_k;
-        for(auto &[candidate, freq] : freqTable) {
-            if(freq >= minSupCount)
-                frequent_k.push_back(candidate);
-        }
-        for(itemset &i : frequent_k)
-            frequent.push_back(i);
-
-        // Generate new candidate set (Gross...)
-        candidateSet.clear();
-        if((int)frequent_k.size() == 0) break;
-        for(auto it1 = begin(frequent_k); it1 < end(frequent_k)-1; ++it1) {
-            auto it2 = it1 + 1;
-            while(it2 < end(frequent_k)) {
-                // For two candidate sets, see if K-1 items match
-                int k = 0;
-                auto itemsetA = it1->begin();
-                auto itemsetB = it2->begin();
-                while(k < K-1) {
-                    if((*itemsetA).name == (*itemsetB).name) {
-                        k++;
-                        ++itemsetA;
-                        ++itemsetB;
-                    } else break;
-                }
-                if(k == K-1) {
-                    itemset newItemset = *it1;
-                    newItemset.insert(*(it2->rbegin()));
-                    candidateSet.insert(newItemset);
-                    ++it2;
-                } else break;
-            }
-            if(K>1) it1 = it2 - 1;
-        }
-        std::cout << candidateSet.size() << " candidates" << std::endl;
+        dbScans += (double)(scanDataBase(scanCount, freqTable, candidateSet,
+                                    frequent) % (int)transactions.size())
+                / transactions.size();
+        std::cout<<"Scans completed: "<<dbScans<<std::endl;
+        scanCount++;
     }
 
     return dbScans;

@@ -20,8 +20,8 @@ idea1: main_idea1.o apriori.o idea1.o
 main_idea1.o: ./src/main_idea1.cpp ./include/Apriori.h ./include/Idea1.h
 	$(CC) $(CFLAGS) -c ./src/main_idea1.cpp
 
-idea1.o: ./src/Apriori.cpp ./include/Apriori.h ./src/Idea1.cpp ./include/Idea1.h
-	$(CC) $(CFLAGS) -c ./src/Apriori.cpp ./src/Idea1.cpp
+idea1.o: ./src/Idea1.cpp ./include/Idea1.h
+	$(CC) $(CFLAGS) -c ./src/Idea1.cpp
 
 # Generator main program
 gen: gen.o

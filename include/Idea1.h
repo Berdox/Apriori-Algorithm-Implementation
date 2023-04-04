@@ -12,17 +12,18 @@ class Idea1 : protected Apriori {
      * Supply a vector of itemsets to populate with results of algorithm.
      * Returns the number of DB scans performed.
      */
-    int aprioriRun(std::vector<itemset> &frequent_itemsets);
+    double aprioriRun(std::set<itemset> &frequent_itemsets);
 
   private:
   
     /* .
      * Supply both a frequency table to populate, and the candidate set to look
      * for.
-     * Returns the size of the frequency table.
+     * Returns the last index considered in the transaction list.
      */
-    int scanDataBase(std::map<itemset,int> &freqTable,
-            std::set<itemset> &candidateSet);
+    int scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
+            std::set<std::pair<itemset,int>> &candidateSet,
+            std::set<itemset> &frequent);
 };
 
 #endif

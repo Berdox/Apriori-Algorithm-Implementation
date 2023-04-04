@@ -26,14 +26,14 @@ int main(int argc, char* argv[]) {
     double min_sup = std::stod(argv[2]);
     
     Idea1 a(filename, min_sup);
-    std::vector<itemset> frequent_itemsets;
+    std::set<itemset> frequent_itemsets;
 
     Timer t;
-    int dbScans = a.aprioriRun(frequent_itemsets);
+    double dbScans = a.aprioriRun(frequent_itemsets);
     auto idea1_time = t.elapsed();
 
     std::cout << "Frequent Itemsets: [size]" << std::endl;
-    for(itemset &s:frequent_itemsets) {
+    for(const itemset &s:frequent_itemsets) {
         std::cout << "{";
         for(auto i:s)
             std::cout<<i.name<<",";
@@ -41,7 +41,8 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << (int)frequent_itemsets.size() << " itemsets found in "
-        << dbScans << " scans"<<std::endl;
+              << std::fixed << std::setprecision(1) << dbScans << " scans"
+              << std::endl;
 
     std::cout << std::fixed << std::setprecision(2)
               << "Time taken " << idea1_time << "s" << std::endl;
