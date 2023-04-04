@@ -1,69 +1,25 @@
-########################################################################
-####################### Makefile Template ##############################
-########################################################################
-
-# Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++17 -Wall
-LDFLAGS = 
+CFLAGS = -O2 -Wall
 
-# Makefile settings - Can be customized.
-APPNAME = apriori
-EXT = .cpp
-SRCDIR = ./src
-OBJDIR = .
+all: apriori gen
 
-############## Do not change anything from here downwards! #############
-SRC = $(wildcard $(SRCDIR)/*$(EXT))
-OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
-DEP = $(OBJ:$(OBJDIR)/%.o=%.d)
-# UNIX-based OS variables & settings
-RM = rm
-DELOBJ = $(OBJ)
-# Windows OS variables & settings
-DEL = del
-EXE = .exe
-WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+# Apriori main program
+apriori: main.o apriori.o
+	$(CC) $(CFLAGS) -o apriori main.o apriori.o
 
-########################################################################
-####################### Targets beginning here #########################
-########################################################################
+main.o: ./src/main.cpp ./include/Apriori.h
+	$(CC) $(CFLAGS) -c ./src/main.cpp
 
-all: $(APPNAME)
+apriori.o: ./src/Apriori.cpp ./include/Apriori.h
+	$(CC) $(CFLAGS) -c ./src/Apriori.cpp
 
-# Builds the app
-$(APPNAME): $(OBJ)
-	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+# Generator main program
+gen: gen.o
+	$(CC) $(CFLAGS) -o gen gen.o
 
-# Creates the dependecy rules
-%.d: $(SRCDIR)/%$(EXT)
-	@$(CPP) $(CFLAGS) $< -MM -MT $(@:%.d=$(OBJDIR)/%.o) >$@
+gen.o: ./src/gen.cpp
+	$(CC) $(CFLAGS) -c ./src/gen.cpp
 
-# Includes all .h files
--include $(DEP)
-
-# Building rule for .o files and its .c/.cpp in combination with all .h
-$(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
-	$(CC) $(CXXFLAGS) -o $@ -c $<
-
-################### Cleaning rules for Unix-based OS ###################
-# Cleans complete project
-.PHONY: clean
+# Clean directory
 clean:
-	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
-
-# Cleans only all files with the extension .d
-.PHONY: cleandep
-cleandep:
-	$(RM) $(DEP)
-
-#################### Cleaning rules for Windows OS #####################
-# Cleans complete project
-.PHONY: cleanw
-cleanw:
-	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
-
-# Cleans only all files with the extension .d
-.PHONY: cleandepw
-cleandepw:
-	$(DEL) $(DEP)
+	$(RM) apriori gen *.o *.d

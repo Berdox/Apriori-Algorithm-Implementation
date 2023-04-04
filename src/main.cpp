@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     for(itemset &s:frequent_itemsets) {
         std::cout << "{";
         for(auto i:s)
-            std::cout<<i<<",";
+            std::cout<<i.name<<",";
         std::cout<<"} - ["<<(int)s.size()<<"]\n";
     }
 

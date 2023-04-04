@@ -7,7 +7,11 @@
 #include <vector>
 #include <ostream>
 
-typedef std::set<std::string> itemset;
+struct item {
+    std::string name;
+};
+
+typedef std::set<item> itemset;
 
 class Apriori {
   public:

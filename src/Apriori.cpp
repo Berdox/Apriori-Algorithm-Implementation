@@ -2,12 +2,19 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <ostream>
 #include <cmath>
 
-bool operator<(const itemset &a, const itemset &b) {
+inline bool operator<(const item &a, const item &b) {
+    // Sort numerically by item name instead of lexicographically.
+    // i.e i5 should be less than i25
+    return std::stoi(a.name.substr(1)) < std::stoi(b.name.substr(1));
+}
+
+inline bool operator<(const itemset &a, const itemset &b) {
     // Ensure itemsets are sorted in lexicographical order
     return std::lexicographical_compare(begin(a), end(a), begin(b), end(b));
 }
@@ -43,7 +50,7 @@ int Apriori::readDataBase(std::string dbName) {
         std::string item;
         while(iss>>item) {
             item = item.substr(0, item.length()-1);
-            newItemset.insert(item);
+            newItemset.insert({item});
         }
 
         transactions.push_back(newItemset);
@@ -87,6 +94,7 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
 
     while(!candidateSet.empty()) {
         int K = begin(candidateSet)->size();
+        std::cout << "Generating " << K << "-itemsets" << std::endl;
 
         // Scan DB for candidate itemsets
         std::map<itemset,int> freqTable;
@@ -113,7 +121,7 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
                 auto itemsetA = it1->begin();
                 auto itemsetB = it2->begin();
                 while(k < K-1) {
-                    if(*itemsetA == *itemsetB) {
+                    if((*itemsetA).name == (*itemsetB).name) {
                         k++;
                         ++itemsetA;
                         ++itemsetB;
@@ -121,12 +129,14 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
                 }
                 if(k == K-1) {
                     itemset newItemset = *it1;
-                    newItemset.insert(*itemsetB);
+                    newItemset.insert(*(it2->rbegin()));
                     candidateSet.insert(newItemset);
                     ++it2;
                 } else break;
             }
+            if(K>1) it1 = it2 - 1;
         }
+        std::cout << candidateSet.size() << " candidates" << std::endl;
     }
 
     return dbScans;
