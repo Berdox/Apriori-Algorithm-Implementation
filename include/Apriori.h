@@ -1,17 +1,14 @@
 #ifndef APRIORI_H_INCLUDED
 #define APRIORI_H_INCLUDED
 
+#include "./Itemset.h"
+
 #include <string>
 #include <map>
 #include <set>
 #include <vector>
 #include <ostream>
 
-struct item {
-    std::string name;
-};
-
-typedef std::set<item> itemset;
 
 class Apriori {
   public:
@@ -24,7 +21,7 @@ class Apriori {
      */
     int aprioriRun(std::vector<itemset> &frequent_itemsets);
 
-  private:
+  protected:
     double minSup;
     int minSupCount;
 

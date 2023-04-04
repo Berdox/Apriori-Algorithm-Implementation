@@ -1,4 +1,5 @@
 #include "../include/Apriori.h"
+#include "../include/Itemset.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -7,17 +8,6 @@
 #include <algorithm>
 #include <ostream>
 #include <cmath>
-
-inline bool operator<(const item &a, const item &b) {
-    // Sort numerically by item name instead of lexicographically.
-    // i.e i5 should be less than i25
-    return std::stoi(a.name.substr(1)) < std::stoi(b.name.substr(1));
-}
-
-inline bool operator<(const itemset &a, const itemset &b) {
-    // Ensure itemsets are sorted in lexicographical order
-    return std::lexicographical_compare(begin(a), end(a), begin(b), end(b));
-}
 
 Apriori::Apriori(std::string dbName, double minSup) : minSup(minSup) {
     // Perform initial scan of file
