@@ -2,7 +2,7 @@
 
 ## Usage
 
-`make` - Compiles Apriori, Idea1 and GenDatabase programs
+`make all` - Compiles Apriori, Idea1 and GenDatabase programs
 
 Their respective targets are:
 ```
