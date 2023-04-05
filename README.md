@@ -5,20 +5,31 @@
 `make` - Compiles Apriori, Idea1 and GenDatabase programs
 
 Their respective targets are:
-`make Apriori`
-`make Idea1`
-`make GenDatabase`
-
+```
+make Apriori
+make Idea1
+make GenDatabase
+```
 Cleaning the executables:
-`make clean`
+```
+make clean
+```
 
+---
 
 To create database files:
-`./GenDatabase`
+```
+./GenDatabase
+```
 
 To run Apriori/Idea1 implementation:
-`./executable <filename> <min_sup>`
+```
+./executable <filename> <min_sup>
+```
+
 example:
-`./Apriori ./databases/D1K.txt 0.01`
+```
+./Apriori ./databases/D1K.txt 0.01
+```
 
 ## Results
