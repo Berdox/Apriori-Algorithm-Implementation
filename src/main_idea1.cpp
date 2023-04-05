@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
     char outputFile[100];
     sprintf(outputFile, "./results/%s_Idea1_%d.freq",
-                DBname.c_str(), (int)min_sup*100);
+                DBname.c_str(), (int)(min_sup*100));
 
     // Open filestream
     std::ofstream file;
