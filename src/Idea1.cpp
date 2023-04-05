@@ -13,25 +13,15 @@ int Idea1::scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
     int idx = scanNo * (int)transactions.size();
     while(idx < (scanNo+1) * (int)transactions.size()) {
         auto &transaction = transactions[idx % (int)transactions.size()];
-        // std::cout<<"transaction: "<<idx<<" ("<<idx%transactions.size()<<")"<<std::endl;
 
         if(candidateSet.empty()) break;
         auto it = begin(candidateSet);
         while(it!=end(candidateSet)) {
             const itemset &itms = it->first;
             const int &endIdx = it->second;
-            // std::cout << "looking for {";
-            // for(item x : itms)
-            //     std::cout<<x.name<<" ";
-            // std::cout<<"} with end: "<<endIdx<<std::endl;
-            
 
             // This candidate has completed 1 full DB scan
             if(idx >= endIdx) {
-                // std::cout << "done counting {";
-                // for(item x : it->first)
-                //     std::cout<<x.name<<" ";
-                // std::cout<<"} at idx: "<<idx<<std::endl;
                 it = candidateSet.erase(it);
                 continue;
             }
@@ -42,16 +32,12 @@ int Idea1::scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
             std::set_intersection(begin(itms), end(itms),
                     begin(transaction), end(transaction),
                     std::inserter(intersection, begin(intersection)));
-            if(intersection.size() == itms.size()) {
 
-                // std::cout<<"found itemset {";
-                // for(item x : itms)
-                //     std::cout<<x.name<<" ";
-                // std::cout<<"}\n";
-                
+            if(intersection.size() == itms.size()) {
                 freqTable[itms]++;
+
+                // Create new candidates only once for each frequent set
                 if(freqTable[itms] >= minSupCount && !frequent.count(itms)) {
-                    // std::cout<<"frequent!"<<std::endl;
                     frequent.insert(itms);
                     
                     int K = itms.size();
@@ -63,11 +49,6 @@ int Idea1::scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
                         auto itemsetA = itms.begin();
                         auto itemsetB = other_frequent.begin();
                  
-                        // std::cout<<"comparing with {";
-                        // for(item x : other_frequent)
-                        //     std::cout<<x.name<<" ";
-                        // std::cout<<"}"<<std::endl;
-                        
                         while(k < K-1) {
                             if((*itemsetA).name == (*itemsetB).name) {
                                 k++;
@@ -80,29 +61,26 @@ int Idea1::scanDataBase(int scanNo, std::map<itemset,int> &freqTable,
                             newItemset.insert(*(other_frequent.rbegin()));
                             if(newItemset.size() == itms.size()) continue;
 
-                            // std::cout<<"creating new itemset {";
-                            // for(item x : newItemset)
-                            //     std::cout<<x.name<<" ";
-                            // std::cout<<"} at idx: "<<idx+transactions.size()<<std::endl;
-                            
                             candidateSet.insert({
                                     newItemset,
                                     idx+(int)transactions.size()
                                 });
-                        }
+                        } else break;
                     }
                 }
             }
-            ++it;
+            ++it; // Next Candidate
         }
 
-        idx++;
+        idx++; // Next Transaction
     }
 
     return idx;
 }
 
 double Idea1::aprioriRun(std::set<itemset> &frequent) {
+    std::cout << "Running Apriori algorithm with idea 1..." << std::endl;
+
     // Assuming no duplicate items can exist in any given transaction, gather
     // the inital frequencies from DB
     double dbScans = 1;
@@ -114,13 +92,13 @@ double Idea1::aprioriRun(std::set<itemset> &frequent) {
         }
     }
 
+    // Continually perform DB scans until there are no more candidates
     std::map<itemset,int> freqTable;
     int scanCount = 0;
     while(!candidateSet.empty()) {
         dbScans += (double)(scanDataBase(scanCount, freqTable, candidateSet,
                                     frequent) % (int)transactions.size())
                 / transactions.size();
-        std::cout<<"Scans completed: "<<dbScans<<std::endl;
         scanCount++;
     }
 

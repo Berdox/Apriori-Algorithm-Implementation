@@ -71,6 +71,8 @@ int Apriori::scanDataBase(std::map<itemset,int> &freqTable,
 }
 
 int Apriori::aprioriRun(std::vector<itemset> &frequent) {
+    std::cout << "Running Apriori algorithm..." << std::endl;
+
     // Assuming no duplicate items can exist in any given transaction, gather
     // the inital frequencies from DB
     int dbScans = 1;
@@ -121,7 +123,7 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
                     newItemset.insert(*(it2->rbegin()));
                     candidateSet.insert(newItemset);
                     ++it2;
-                } else break;
+                } else break; // Q4 from assignment 2... Magic
             }
             if(K>1) it1 = it2 - 1;
         }
