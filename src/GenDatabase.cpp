@@ -58,28 +58,28 @@ int main () {
     std::srand(seed);
 
     //Generate 1000
-    output.open(OUTPUT_PATH+"D1K.txt", std::ios::app);
+    output.open(OUTPUT_PATH+"D1K.txt", std::ios::out);
     for(int i = 0; i < 1000; i++) {
         output << GenTransaction(std::rand() % 11 + 5, list) << "\n";
     }
     output.close();
 
     //Generate 10000
-    output.open(OUTPUT_PATH+"D10K.txt", std::ios::app);
+    output.open(OUTPUT_PATH+"D10K.txt", std::ios::out);
     for(int i = 0; i < 10000; i++) {
         output << GenTransaction(std::rand() % 11 + 5, list) << "\n";
     }
     output.close();
 
     //Generate 50000
-    output.open(OUTPUT_PATH+"D50K.txt", std::ios::app);
+    output.open(OUTPUT_PATH+"D50K.txt", std::ios::out);
     for(int i = 0; i < 50000; i++) {
         output << GenTransaction(std::rand() % 11 + 5, list) << "\n";
     }
     output.close();
 
     //Generate 100000
-    output.open(OUTPUT_PATH+"D100K.txt", std::ios::app);
+    output.open(OUTPUT_PATH+"D100K.txt", std::ios::out);
     for(int i = 0; i < 100000; i++) {
         output << GenTransaction(std::rand() % 11 + 5, list) << "\n";
     }

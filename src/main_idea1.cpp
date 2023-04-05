@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
     // Get filename
     if(argc < 2) {
         std::cerr << "no filename provided" << std::endl;
+        std::cerr << "example usage: ./idea1 ./databases/D1K.txt .01"
+                  << std::endl;
         return -1;
     }
     std::string filename = argv[1];
@@ -23,12 +25,19 @@ int main(int argc, char* argv[]) {
     // Get filename
     if(argc < 3) {
         std::cerr << "no min_sup provided" << std::endl;
+        std::cerr << "example usage: ./idea1 ./databases/D1K.txt .01"
+                  << std::endl;
         return -1;
     }
     double min_sup = std::stod(argv[2]);
     
     // Setup apriori
     Idea1 a(filename, min_sup);
+    if(a.errBit) {
+        std::cerr << "example usage: ./idea1 ./databases/D1K.txt .01"
+                  << std::endl;
+        return -1;
+    }
     std::set<itemset> frequent_itemsets;
 
     // Run algorithm

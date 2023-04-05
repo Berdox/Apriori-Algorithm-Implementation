@@ -33,3 +33,4 @@
 *.app
 
 results/*.freq
+databases/*.txt

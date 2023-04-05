@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
     // Get filename
     if(argc < 2) {
         std::cerr << "no filename provided" << std::endl;
+        std::cerr << "example usage: ./apriori ./databases/D1K.txt .01"
+                  << std::endl;
         return -1;
     }
     std::string filename = argv[1];
@@ -23,12 +25,19 @@ int main(int argc, char* argv[]) {
     // Get filename
     if(argc < 3) {
         std::cerr << "no min_sup provided" << std::endl;
+        std::cerr << "example usage: ./apriori ./databases/D1K.txt .01"
+                  << std::endl;
         return -1;
     }
     double min_sup = std::stod(argv[2]);
     
     // Setup apriori
     Apriori a(filename, min_sup);
+    if(a.errBit) {
+        std::cerr << "example usage: ./apriori ./databases/D1K.txt .01"
+                  << std::endl;
+        return -1;
+    }
     std::vector<itemset> frequent_itemsets;
 
     // Run the algorithm
@@ -47,7 +56,7 @@ int main(int argc, char* argv[]) {
 
     // Open filestream
     std::ofstream file;
-    file.open(outputFile);
+    file.open(outputFile, std::ios::out);
     if(!file) {
         std::cerr << "unable to open output file: " << outputFile << std::endl;
         return -1;

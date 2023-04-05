@@ -33,4 +33,4 @@ GenDatabase.o: ./src/GenDatabase.cpp
 
 # Clean directory
 clean:
-	$(RM) Apriori Gen Idea1 *.o *.d
+	$(RM) Apriori GenDatabase Idea1 *.o *.d

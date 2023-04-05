@@ -3,7 +3,7 @@
 
 #include "./Apriori.h"
 
-class Idea1 : protected Apriori {
+class Idea1 : public Apriori {
   public:
     Idea1(std::string dbName, double minSup) : Apriori(dbName, minSup) {};
     ~Idea1() {}

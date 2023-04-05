@@ -14,6 +14,7 @@ Apriori::Apriori(std::string dbName, double minSup) : minSup(minSup) {
     int ret = readDataBase(dbName);
     if(ret == -1) {
         std::cerr << "error initializing apriori" << std::endl;
+        errBit = 1;
         return;
     }
 

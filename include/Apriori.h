@@ -21,9 +21,12 @@ class Apriori {
      */
     int aprioriRun(std::vector<itemset> &frequent_itemsets);
 
+    bool errBit = false;
+
   protected:
     double minSup;
     int minSupCount;
+
 
     std::vector<itemset> transactions;
 
