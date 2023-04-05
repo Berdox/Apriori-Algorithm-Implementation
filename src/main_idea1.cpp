@@ -1,9 +1,9 @@
 #include "../include/Idea1.h"
 #include "../include/Timer.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <sstream>
 #include <string>
 
 /*
@@ -27,62 +27,50 @@ int main(int argc, char* argv[]) {
     }
     double min_sup = std::stod(argv[2]);
     
+    // Setup apriori
     Idea1 a(filename, min_sup);
     std::set<itemset> frequent_itemsets;
 
+    // Run algorithm
     Timer t;
     double dbScans = a.aprioriRun(frequent_itemsets);
     auto idea1_time = t.elapsed();
 
     // Making the output file name
-    std::fstream file;
     int posD = filename.find("D");
-    int posTxt = filename.find("txt") - 1;
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(4) << min_sup;
-    std::string support = stream.str();
-    support.erase(0,2);
-    std::string outputFile = "./results/" + filename.substr(posD, posTxt - posD) + "_idea1_" +
-                                                         support + ".freq";
- 
-    file.open(outputFile, std::ios::app);
+    int posTxt = filename.find(".txt");
+    std::string DBname = filename.substr(posD, posTxt-posD);
 
-    file << "Frequent Itemsets: [size]" << std::endl;
-    //std::cout << "Frequent Itemsets: [size]" << std::endl;
+    char outputFile[100];
+    sprintf(outputFile, "./results/%s_Idea1_%d.freq",
+                DBname.c_str(), (int)min_sup*100);
 
-    for(const itemset &s:frequent_itemsets) {
-        file << "{";
-        for(auto i:s)
-            file <<i.name<<",";
-        file <<"} - ["<<(int)s.size()<<"]\n";
-
-        /*std::cout << "{";
-        for(auto i:s)
-            std::cout<<i.name<<",";
-        std::cout<<"} - ["<<(int)s.size()<<"]\n";*/
+    // Open filestream
+    std::ofstream file;
+    file.open(outputFile);
+    if(!file) {
+        std::cerr << "unable to open output file: " << outputFile << std::endl;
+        return -1;
     }
 
-    file << (int)frequent_itemsets.size() << " itemsets found in "
-              << std::fixed << std::setprecision(1) << dbScans << " scans"
-              << std::endl;
-
-    file << std::fixed << std::setprecision(2)
-              << "Time taken " << idea1_time << "s" << std::endl;
-
+    // Write itemsets to file
+    for(const itemset &s : frequent_itemsets) {
+        file << "{";
+        for(auto it = begin(s); it != end(s); ++it) {
+            file << it->name;
+            if(std::distance(it,end(s)) != 1)
+                file << ",";
+        }
+        file <<"}\n";
+    }
     file.close();
 
-    std::cout << "The frequent itemsets are stored in " << outputFile 
-              << ", under ms = " << min_sup << std::fixed << std::setprecision(2) 
-              << ". \nThe time spent is " << idea1_time 
-              << "s, to get the frequent itemsets. \nThe number of times scanning"  
-              << " the database is " << std::fixed << std::setprecision(1) << dbScans
-              << " to get the frequent itemsets. \n";
+    // Stdout information display
+    std::cout << frequent_itemsets.size() << " frequent itemsets written to: "
+              << outputFile << std::endl;
+    std::cout << "Performed " << std::fixed << std::setprecision(1) << dbScans
+              << " DB scans in " << std::setprecision(2) << idea1_time 
+              << "s" << std::endl;
 
-    /*std::cout << (int)frequent_itemsets.size() << " itemsets found in "
-              << std::fixed << std::setprecision(1) << dbScans << " scans"
-              << std::endl;
-
-    std::cout << std::fixed << std::setprecision(2)
-              << "Time taken " << idea1_time << "s" << std::endl;*/
     return 0;
 }

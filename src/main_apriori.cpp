@@ -1,10 +1,10 @@
+#include "../include/Apriori.h"
+#include "../include/Timer.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include "../include/Apriori.h"
-#include "../include/Timer.h"
 
 /*
  * Usage:
@@ -45,9 +45,15 @@ int main(int argc, char* argv[]) {
     sprintf(outputFile, "./results/%s_Apriori_%d.freq",
                 DBname.c_str(), (int)min_sup*100);
 
+    // Open filestream
     std::ofstream file;
     file.open(outputFile);
+    if(!file) {
+        std::cerr << "unable to open output file: " << outputFile << std::endl;
+        return -1;
+    }
 
+    // Write itemsets to file
     for(itemset &s : frequent_itemsets) {
         file << "{";
         for(auto it = begin(s); it != end(s); ++it) {
@@ -56,18 +62,14 @@ int main(int argc, char* argv[]) {
                 file << ",";
         }
         file <<"}\n";
-
-        /*std::cout << "{";
-        for(auto i:s)
-            std::cout<<i.name<<",";
-        std::cout<<"} - ["<<(int)s.size()<<"]\n";*/
     }
     file.close();
 
+    // Stdout information display
     std::cout << frequent_itemsets.size() << " frequent itemsets written to: "
               << outputFile << std::endl;
-    std::cout << "Performed " << dbScans << " DB scans in " << apriori_time 
-              << "s" << std::endl;
+    std::cout << "Performed " << dbScans << " DB scans in " << std::fixed
+              << std::setprecision(2) << apriori_time << "s" << std::endl;
 
     return 0;
 }
