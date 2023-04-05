@@ -1,5 +1,7 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include "../include/Apriori.h"
 #include "../include/Timer.h"
@@ -32,13 +34,39 @@ int main(int argc, char* argv[]) {
     int dbScans = a.aprioriRun(frequent_itemsets);
     auto apriori_time = t.elapsed();
 
+    // Making the output file name
+    std::fstream file;
+    int posD = filename.find("D");
+    int posTxt = filename.find("txt") - 1;
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << min_sup;
+    std::string support = stream.str();
+    support.erase(0,2);
+ 
+    file.open("./results/" + filename.substr(posD, posTxt - posD) + "_Apriori_" +
+                                                         support + ".freq", std::ios::app);
+
     std::cout << "Frequent Itemsets: [size]" << std::endl;
+
     for(itemset &s:frequent_itemsets) {
+        file << "{";
+        for(auto i:s)
+            file <<i.name<<",";
+        file <<"} - ["<<(int)s.size()<<"]\n";
+
         std::cout << "{";
         for(auto i:s)
             std::cout<<i.name<<",";
         std::cout<<"} - ["<<(int)s.size()<<"]\n";
     }
+
+    file << (int)frequent_itemsets.size() << " itemsets found in "
+        << dbScans << " scans"<<std::endl;
+
+    file << std::fixed << std::setprecision(2)
+              << "Time taken " << apriori_time << "s" << std::endl;
+    
+    file.close();
 
     std::cout << (int)frequent_itemsets.size() << " itemsets found in "
         << dbScans << " scans"<<std::endl;
