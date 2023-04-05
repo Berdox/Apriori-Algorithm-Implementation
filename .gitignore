@@ -32,4 +32,4 @@
 *.out
 *.app
 
-databases/D*
+results/*.freq

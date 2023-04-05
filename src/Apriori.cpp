@@ -84,7 +84,6 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
 
     while(!candidateSet.empty()) {
         int K = begin(candidateSet)->size();
-        std::cout << "Generating " << K << "-itemsets" << std::endl;
 
         // Scan DB for candidate itemsets
         std::map<itemset,int> freqTable;
@@ -126,7 +125,6 @@ int Apriori::aprioriRun(std::vector<itemset> &frequent) {
             }
             if(K>1) it1 = it2 - 1;
         }
-        std::cout << candidateSet.size() << " candidates" << std::endl;
     }
 
     return dbScans;

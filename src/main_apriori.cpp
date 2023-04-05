@@ -27,58 +27,47 @@ int main(int argc, char* argv[]) {
     }
     double min_sup = std::stod(argv[2]);
     
+    // Setup apriori
     Apriori a(filename, min_sup);
     std::vector<itemset> frequent_itemsets;
 
+    // Run the algorithm
     Timer t;
     int dbScans = a.aprioriRun(frequent_itemsets);
     auto apriori_time = t.elapsed();
 
     // Making the output file name
-    std::fstream file;
     int posD = filename.find("D");
-    int posTxt = filename.find("txt") - 1;
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(4) << min_sup;
-    std::string support = stream.str();
-    support.erase(0,2);
-    std::string outputFile = "./results/" + filename.substr(posD, posTxt - posD) + "_Apriori_" +
-                                                         support + ".freq";
-    file.open(outputFile, std::ios::app);
+    int posTxt = filename.find(".txt");
+    std::string DBname = filename.substr(posD, posTxt-posD);
 
-    //std::cout << "Frequent Itemsets: [size]" << std::endl;
+    char outputFile[100];
+    sprintf(outputFile, "./results/%s_Apriori_%d.freq",
+                DBname.c_str(), (int)min_sup*100);
 
-    file << "Frequent Itemsets: [size]" << std::endl;
+    std::ofstream file;
+    file.open(outputFile);
 
-    for(itemset &s:frequent_itemsets) {
+    for(itemset &s : frequent_itemsets) {
         file << "{";
-        for(auto i:s)
-            file <<i.name<<",";
-        file <<"} - ["<<(int)s.size()<<"]\n";
+        for(auto it = begin(s); it != end(s); ++it) {
+            file << it->name;
+            if(std::distance(it,end(s)) != 1)
+                file << ",";
+        }
+        file <<"}\n";
 
         /*std::cout << "{";
         for(auto i:s)
             std::cout<<i.name<<",";
         std::cout<<"} - ["<<(int)s.size()<<"]\n";*/
     }
-
-    file << (int)frequent_itemsets.size() << " itemsets found in "
-        << dbScans << " scans"<<std::endl;
-
-    file << std::fixed << std::setprecision(2)
-              << "Time taken " << apriori_time << "s" << std::endl;
-    
     file.close();
 
-    std::cout << "The frequent itemsets are stored in " << outputFile 
-              << ", under ms = " << min_sup << std::fixed << std::setprecision(2) 
-              << ". \nThe time spent is " << apriori_time 
-              << "s, to get the frequent itemsets" << std::endl;
+    std::cout << frequent_itemsets.size() << " frequent itemsets written to: "
+              << outputFile << std::endl;
+    std::cout << "Performed " << dbScans << " DB scans in " << apriori_time 
+              << "s" << std::endl;
 
-    /*std::cout << (int)frequent_itemsets.size() << " itemsets found in "
-        << dbScans << " scans"<<std::endl;
-
-    std::cout << std::fixed << std::setprecision(2)
-              << "Time taken " << apriori_time << "s" << std::endl;*/
     return 0;
 }
